@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Build app for release
+        run: msbuild aya5.vcxproj -t:rebuild -property:Configuration=Release
+
+      - name: Prepare for Upload
+        run: |
+          mkdir artifacts
+          move Release/yaya.dll artifacts
+          copy readme.txt artifacts/readme.txt
+          copy readme-original.txt artifacts/readme-original.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: yaya
+          path: artifacts
